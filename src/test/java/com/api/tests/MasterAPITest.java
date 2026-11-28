@@ -1,13 +1,13 @@
 package com.api.tests;
 
-import static com.api.utils.ConfigManager.*;
 import static io.restassured.RestAssured.*;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.*;
 import java.io.IOException;
-import static com.api.utils.AuthTokenProvider.*;
 import static com.api.constant.Role.*;
 import org.testng.annotations.Test;
+
+import com.api.utils.SpecUtil;
 
 public class MasterAPITest {
 	
@@ -16,18 +16,11 @@ public class MasterAPITest {
 	public void masterAPITest() throws IOException {
 		
 		given()
-		.baseUri(getProperty("BASE_URI"))
-		.and()
-		.header("Authorization",getToken(FD))
-		.and()
-		.contentType("")
-		.log().all()
+	    .spec(SpecUtil.requestSpecWithAuth(FD))
 		.when()
 		.post("master")  //default content-type application/url-formencoded
 		.then()
-		.log().all()
-		.statusCode(200)
-		.time(lessThan(1000L))
+		.spec(SpecUtil.responseSpec_OK(DEFAULT_PORT))
 		.body("message", equalTo("Success"))
 		.body("data",notNullValue())
 		.body("data",hasKey("mst_oem"))
@@ -45,15 +38,11 @@ public class MasterAPITest {
 	
 	public void masterAPITest_MissingAuthToken() throws IOException {
 		given()
-		.baseUri(getProperty("BASE_URI"))
-		.and()
-		.contentType("")
-		.log().all()
+		.spec(SpecUtil.requestSpec())
 		.when()
 		.post("master")
 		.then()
-		.log().all()
-		.statusCode(401);
+		.spec(SpecUtil.responseSpec_TEXT(401));
 	}
 
 }
